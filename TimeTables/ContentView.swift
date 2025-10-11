@@ -16,7 +16,7 @@ struct ContentView: View {
     @State private var playing = false
     
     @State private var questionCount = 0
-    @State private var possibleAnswers = [Int()]
+    @State private var possibleAnswers = [Int]()
     @State private var currentQuerstion = 0
     
     @State private var score = 0
