@@ -8,28 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    let timeTables = Array(1...12)
-    let numberOfQuestions = [5, 10, 20]
-    
-    @State private var selectedNumberOfQuestions = 5
-    @State private var selectedTable: Int = 0
-    @State private var playing = false
-    
-    @State private var questionCount = 0
-    @State private var possibleAnswers = [Int]()
-    @State private var currentQuerstion = 0
-    
-    @State private var score = 0
-    @State private var showingScore = false
-    
     let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+    
+    @State private var viewModel = ViewModel()
     
     var body: some View {
         NavigationStack {
-            if playing {
+            if viewModel.isPlaying {
                 VStack(spacing: 24) {
                     VStack() {
-                        Text("\(currentQuerstion) x \(selectedTable)")
+                        Text("\(viewModel.currentQuerstion) x \(viewModel.selectedTable)")
                             .font(.largeTitle)
                             .foregroundStyle(.teal)
                             .frame(minWidth: 200)
@@ -40,9 +28,9 @@ struct ContentView: View {
                     
                     
                     VStack {
-                        ForEach(possibleAnswers, id: \.self) { number in
+                        ForEach(viewModel.possibleAnswers, id: \.self) { number in
                             Button {
-                                checkAswer(number)
+                                viewModel.checkAswer(number)
                             } label: {
                                 Text("\(number)")
                                     .frame(height: 80)
@@ -57,13 +45,13 @@ struct ContentView: View {
                     }
                 }
                 .padding()
-                .navigationTitle("Question \(questionCount)/\(selectedNumberOfQuestions)")
+                .navigationTitle("Question \(viewModel.questionCount)/\(viewModel.selectedNumberOfQuestions)")
             } else {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading) {
                         Section("Number of questions") {
-                            Picker(selection: $selectedNumberOfQuestions) {
-                                ForEach(numberOfQuestions, id: \.self) {
+                            Picker(selection: $viewModel.selectedNumberOfQuestions) {
+                                ForEach(viewModel.numberOfQuestions, id: \.self) {
                                     Text("\($0)")
                                 }
                             } label: {
@@ -78,9 +66,9 @@ struct ContentView: View {
                             .font(.title2)
                         
                         LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(timeTables, id: \.self) { table in
+                            ForEach(viewModel.timeTables, id: \.self) { table in
                                 Button {
-                                    selectedTable = table
+                                    viewModel.selectedTable = table
                                 } label: {
                                     Text("\(table)")
                                         .frame(height: 80)
@@ -89,7 +77,7 @@ struct ContentView: View {
                                 }
                                 .buttonStyle(.glass)
                                 .buttonSizing(.flexible)
-                                .tint(selectedTable == table ? .pink : .teal)
+                                .tint(viewModel.selectedTable == table ? .pink : .teal)
                                 .buttonBorderShape(.roundedRectangle(radius: 12))
                             }
                         }
@@ -98,7 +86,7 @@ struct ContentView: View {
                     Spacer()
                     
                     Button {
-                        startGame()
+                        viewModel.startGame()
                     } label: {
                         Text("Start!")
                             .frame(height: 40)
@@ -109,71 +97,21 @@ struct ContentView: View {
                     .buttonSizing(.flexible)
                     .tint(.pink)
                     .buttonBorderShape(.roundedRectangle(radius: 12))
-                    .disabled(selectedTable == 0)
+                    .disabled(viewModel.selectedTable == 0)
                     
                 }
                 .padding()
                 .navigationTitle("Time tables")
             }
         }
-        .alert("Game Over", isPresented: $showingScore) {
+        .alert("Game Over", isPresented: $viewModel.showingScore) {
             
         } message: {
-            Text("Success: \(score) - Wrong: \(selectedNumberOfQuestions - score)")
+            Text("Success: \(viewModel.score) - Wrong: \(viewModel.selectedNumberOfQuestions - viewModel.score)")
         }
     }
     
-    func startGame() {
-        score = 0
-        playing = true
-        askQuestion()
-        
-    }
     
-    func askQuestion() {
-        questionCount += 1
-        currentQuerstion = Array(1...12).randomElement() ?? 1
-        
-        generateAnswers()
-    }
-    
-    func generateAnswers() {
-        var answers = [currentQuerstion * selectedTable]
-        let limit = selectedTable * 12
-        
-        while answers.count < 3 {
-            let newValue = Int.random(in: 1...limit)
-            if !answers.contains(newValue) {
-                answers.append(newValue)
-            }
-        }
-        
-        possibleAnswers = answers.shuffled()
-    }
-    
-    func checkAswer(_ answer: Int) {
-        if currentQuerstion * selectedTable == answer {
-            score += 1
-        } else {
-            score = score > 0 ? score - 1 : 0
-        }
-        
-        if questionCount == selectedNumberOfQuestions {
-            gameOver()
-            return
-        }
-        
-        askQuestion()
-    }
-    
-    func gameOver() {
-        showingScore = true
-        playing = false
-        questionCount = 0
-        currentQuerstion = 0
-        selectedTable = 0
-        
-    }
 }
 #Preview {
     ContentView()
