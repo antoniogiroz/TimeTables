@@ -22,20 +22,24 @@ struct GameView: View {
                     .tint(.teal)
             }
 
-            VStack {
-                ForEach(viewModel.possibleAnswers, id: \.self) { number in
-                    Button {
-                        viewModel.checkAswer(number)
-                    } label: {
-                        Text("\(number)")
-                            .frame(height: 80)
-                            .font(.title)
-                            .scaledToFit()
+            if viewModel.selectedDifficulty == .easy {
+                VStack {
+                    ForEach(viewModel.possibleAnswers, id: \.self) { number in
+                        Button {
+                            viewModel.checkAswer(number)
+                        } label: {
+                            Text("\(number)")
+                                .frame(height: 80)
+                                .font(.title)
+                                .scaledToFit()
+                        }
+                        .buttonStyle(.glass)
+                        .buttonSizing(.flexible)
+                        .buttonBorderShape(.roundedRectangle(radius: 12))
                     }
-                    .buttonStyle(.glass)
-                    .buttonSizing(.flexible)
-                    .buttonBorderShape(.roundedRectangle(radius: 12))
                 }
+            } else {
+                NumberPadView(viewModel: viewModel)
             }
         }
         .padding()
@@ -43,8 +47,23 @@ struct GameView: View {
     }
 }
 
-#Preview {
+#Preview("Easy mode") {
     NavigationStack {
         GameView(viewModel: .previewPlaying())
+    }
+}
+
+#Preview("Normal mode") {
+    NavigationStack {
+        GameView(viewModel: .previewPlaying(difficulty: .normal))
+    }
+}
+
+#Preview("Normal mode - with answer") {
+    let vm = GameViewModel.previewPlaying(difficulty: .normal)
+    vm.userAnswer = "56"
+
+    return NavigationStack {
+        GameView(viewModel: vm)
     }
 }
