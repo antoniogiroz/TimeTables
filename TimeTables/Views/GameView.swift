@@ -45,6 +45,6 @@ struct GameView: View {
 
 #Preview {
     NavigationStack {
-        GameView(viewModel: GameViewModel())
+        GameView(viewModel: .previewPlaying())
     }
 }

@@ -73,3 +73,33 @@ class GameViewModel {
 
     }
 }
+
+// MARK: - Preview Helpers
+extension GameViewModel {
+    /// Creates a GameViewModel configured for playing state
+    static func previewPlaying(
+        question: Int = 7,
+        table: Int = 8,
+        questionCount: Int = 3,
+        totalQuestions: Int = 5,
+        score: Int = 2
+    ) -> GameViewModel {
+        let vm = GameViewModel()
+        vm.isPlaying = true
+        vm.currentQuerstion = question
+        vm.selectedTable = table
+        vm.questionCount = questionCount
+        vm.selectedNumberOfQuestions = totalQuestions
+        vm.score = score
+
+        // Generate realistic answers (correct answer + 2 wrong ones)
+        let correctAnswer = question * table
+        vm.possibleAnswers = [
+            correctAnswer,
+            correctAnswer + Int.random(in: 1...10),
+            correctAnswer - Int.random(in: 1...10)
+        ].shuffled()
+
+        return vm
+    }
+}
