@@ -9,76 +9,87 @@ import SwiftUI
 
 struct ConfigurationView: View {
     @Bindable var viewModel: GameViewModel
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+    let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 4)
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Section("Difficulty") {
-                        Picker(selection: $viewModel.selectedDifficulty) {
-                            ForEach(Difficulty.allCases, id: \.self) { difficulty in
-                                Text(difficulty.rawValue)
-                            }
-                        } label: {
-                            Text("Difficulty")
-                        }
-                        .pickerStyle(.segmented)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    VStack(spacing: 16) {
+                        SettingsPicker(
+                            icon: viewModel.selectedDifficulty == .easy ? "star.fill" : "star.leadinghalf.filled",
+                            iconColor: .orange,
+                            title: "Difficulty",
+                            selection: $viewModel.selectedDifficulty,
+                            options: Difficulty.allCases,
+                            optionLabel: { $0.rawValue }
+                        )
+
+                        SettingsPicker(
+                            icon: "number.circle.fill",
+                            iconColor: .blue,
+                            title: "Number of questions",
+                            selection: $viewModel.selectedNumberOfQuestions,
+                            options: viewModel.numberOfQuestions,
+                            optionLabel: { "\($0)" }
+                        )
                     }
-                    
-                    Section("Number of questions") {
-                        Picker(selection: $viewModel.selectedNumberOfQuestions) {
-                            ForEach(viewModel.numberOfQuestions, id: \.self) {
-                                Text("\($0)")
-                            }
-                        } label: {
-                            Text("Number of questions")
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.background)
+                            .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+                    }
+                    .padding(.horizontal)
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Image(systemName: "multiply.circle.fill")
+                                .foregroundStyle(.mint)
+                            Text("Select multiplication table")
+                                .font(.headline)
                         }
-                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+
+                        LazyVGrid(columns: columns, spacing: 10) {
+                            ForEach(viewModel.timeTables, id: \.self) { table in
+                                TableSelectionButton(
+                                    table: table,
+                                    isSelected: viewModel.selectedTable == table,
+                                    action: { viewModel.selectedTable = table }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
                     }
                 }
-                
-                VStack {
-                    Text("Select a table to practice")
-                        .font(.title2)
-                    
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(viewModel.timeTables, id: \.self) { table in
-                            Button {
-                                viewModel.selectedTable = table
-                            } label: {
-                                Text("\(table)")
-                                    .frame(height: 80)
-                                    .font(.title)
-                                    .scaledToFit()
-                            }
-                            .buttonStyle(.glass)
-                            .buttonSizing(.flexible)
-                            .tint(viewModel.selectedTable == table ? .pink : .teal)
-                            .buttonBorderShape(.roundedRectangle(radius: 12))
-                        }
-                    }
-                }
-                
-                Spacer()
-                
+                .padding(.vertical)
+            }
+
+            VStack(spacing: 0) {
+                Divider()
+
                 Button {
                     viewModel.startGame()
                 } label: {
-                    Text("Start!")
-                        .frame(height: 40)
-                        .font(.title)
-                        .scaledToFit()
+                    HStack {
+                        Image(systemName: "play.fill")
+                        Text("Start Practice")
+                            .font(.headline)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
                 }
-                .buttonStyle(.glassProminent)
-                .buttonSizing(.flexible)
+                .buttonStyle(.borderedProminent)
                 .tint(.pink)
-                .buttonBorderShape(.roundedRectangle(radius: 12))
+                .buttonBorderShape(.roundedRectangle(radius: 14))
                 .disabled(viewModel.selectedTable == 0)
+                .padding()
+                .background(.background)
             }
-            .padding()
-            .navigationTitle("Time tables")
         }
+        .navigationTitle("Time tables")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

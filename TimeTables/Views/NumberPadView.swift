@@ -13,76 +13,75 @@ struct NumberPadView: View {
     let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
 
     var body: some View {
-        VStack(spacing: 24) {
-            // Answer display
-            VStack {
-                Text(viewModel.userAnswer.isEmpty ? "?" : viewModel.userAnswer)
-                    .font(.system(size: 60, weight: .bold))
-                    .foregroundStyle(.teal)
-                    .frame(minWidth: 200, minHeight: 80)
-                    .padding()
-                    .border(.teal, width: 3)
-            }
+        VStack(spacing: 20) {
+            Text(viewModel.userAnswer.isEmpty ? "___" : viewModel.userAnswer)
+                .font(.system(size: 56, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+                .frame(minWidth: 180)
+                .frame(height: 80)
+                .padding(.horizontal, 24)
+                .background {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.gray.opacity(0.15))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(.gray.opacity(0.3), lineWidth: 2)
+                        }
+                }
 
-            // Number pad grid
             LazyVGrid(columns: columns, spacing: 12) {
-                // Numbers 1-9
                 ForEach(1...9, id: \.self) { number in
                     Button {
                         viewModel.appendDigit("\(number)")
                     } label: {
                         Text("\(number)")
-                            .frame(height: 80)
-                            .font(.title)
-                            .scaledToFit()
+                            .font(.system(size: 28, weight: .semibold, design: .rounded))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 64)
                     }
-                    .buttonStyle(.glass)
-                    .buttonSizing(.flexible)
+                    .buttonStyle(.bordered)
+                    .tint(.mint)
                     .buttonBorderShape(.roundedRectangle(radius: 12))
                 }
 
-                // Delete button
                 Button {
                     viewModel.deleteLastDigit()
                 } label: {
-                    Image(systemName: "delete.left")
-                        .frame(height: 80)
-                        .font(.title)
-                        .scaledToFit()
+                    Image(systemName: "delete.backward.fill")
+                        .font(.system(size: 24, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 64)
                 }
-                .buttonStyle(.glass)
-                .buttonSizing(.flexible)
+                .buttonStyle(.bordered)
                 .tint(.orange)
                 .buttonBorderShape(.roundedRectangle(radius: 12))
 
-                // Zero button
                 Button {
                     viewModel.appendDigit("0")
                 } label: {
                     Text("0")
-                        .frame(height: 80)
-                        .font(.title)
-                        .scaledToFit()
+                        .font(.system(size: 28, weight: .semibold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 64)
                 }
-                .buttonStyle(.glass)
-                .buttonSizing(.flexible)
+                .buttonStyle(.bordered)
+                .tint(.mint)
                 .buttonBorderShape(.roundedRectangle(radius: 12))
 
-                // Submit button
                 Button {
                     viewModel.submitAnswer()
                 } label: {
-                    Image(systemName: "checkmark")
-                        .frame(height: 80)
-                        .font(.title)
-                        .scaledToFit()
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 64)
                 }
-                .buttonStyle(.glassProminent)
-                .buttonSizing(.flexible)
+                .buttonStyle(.borderedProminent)
                 .tint(.green)
                 .buttonBorderShape(.roundedRectangle(radius: 12))
                 .disabled(viewModel.userAnswer.isEmpty)
             }
+            .padding(.horizontal, 16)
         }
     }
 }

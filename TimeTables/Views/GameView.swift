@@ -9,41 +9,57 @@ import SwiftUI
 
 struct GameView: View {
     @Bindable var viewModel: GameViewModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 24) {
-            VStack() {
-                Text("\(viewModel.currentQuerstion) x \(viewModel.selectedTable)")
-                    .font(.largeTitle)
-                    .foregroundStyle(.teal)
-                    .frame(minWidth: 200)
-                    .padding()
-                    .border(.teal, width: 3)
-                    .tint(.teal)
-            }
+        VStack(spacing: 40) {
+            QuestionDisplay(
+                question: viewModel.currentQuestion,
+                table: viewModel.selectedTable
+            )
+
+            Spacer()
 
             if viewModel.selectedDifficulty == .easy {
-                VStack {
+                VStack(spacing: 16) {
                     ForEach(viewModel.possibleAnswers, id: \.self) { number in
                         Button {
-                            viewModel.checkAswer(number)
+                            viewModel.checkAnswer(number)
                         } label: {
                             Text("\(number)")
-                                .frame(height: 80)
-                                .font(.title)
-                                .scaledToFit()
+                                .font(.system(size: 32, weight: .semibold, design: .rounded))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 64)
                         }
-                        .buttonStyle(.glass)
-                        .buttonSizing(.flexible)
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mint)
                         .buttonBorderShape(.roundedRectangle(radius: 12))
                     }
                 }
+                .padding(.horizontal, 40)
             } else {
                 NumberPadView(viewModel: viewModel)
             }
+
+            Spacer()
         }
         .padding()
         .navigationTitle("Question \(viewModel.questionCount)/\(viewModel.selectedNumberOfQuestions)")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    viewModel.cancelGame()
+                    dismiss()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                }
+            }
+        }
     }
 }
 

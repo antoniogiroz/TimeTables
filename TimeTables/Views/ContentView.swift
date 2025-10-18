@@ -12,16 +12,13 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            if viewModel.isPlaying {
-                GameView(viewModel: viewModel)
-            } else {
-                ConfigurationView(viewModel: viewModel)
-            }
-        }
-        .alert("Game Over", isPresented: $viewModel.showingScore) {
-
-        } message: {
-            Text("Success: \(viewModel.score) - Wrong: \(viewModel.selectedNumberOfQuestions - viewModel.score)")
+            ConfigurationView(viewModel: viewModel)
+                .navigationDestination(isPresented: $viewModel.isPlaying) {
+                    GameView(viewModel: viewModel)
+                        .navigationDestination(isPresented: $viewModel.showingResults) {
+                            ResultsView(viewModel: viewModel)
+                        }
+                }
         }
     }
 }

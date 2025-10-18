@@ -14,22 +14,34 @@ enum Difficulty: String, CaseIterable {
 
 @Observable
 class GameViewModel {
+    // MARK: - Constants
+    private let maxTimesTable = 12
+    private let numberOfAnswerOptions = 3
+
+    // MARK: - Configuration
     let timeTables = Array(1...12)
     let numberOfQuestions = [5, 10, 20]
 
     var selectedNumberOfQuestions = 5
     var selectedTable: Int = 0
     var selectedDifficulty: Difficulty = .easy
+
+    // MARK: - Game State
     var isPlaying = false
+    var showingResults = false
 
     var questionCount = 0
     var possibleAnswers = [Int]()
-    var currentQuerstion = 0
+    var currentQuestion = 0
     var userAnswer: String = ""
 
     var score = 0
-    var showingScore = false
 
+    var correctAnswer: Int {
+        currentQuestion * selectedTable
+    }
+
+    // MARK: - Game Flow
     func startGame() {
         score = 0
         isPlaying = true
@@ -38,20 +50,21 @@ class GameViewModel {
 
     func askQuestion() {
         questionCount += 1
-        currentQuerstion = Array(1...12).randomElement() ?? 1
+        currentQuestion = Array(1...maxTimesTable).randomElement() ?? 1
         userAnswer = ""
 
-        // Only generate answers for easy mode
         if selectedDifficulty == .easy {
             generateAnswers()
         }
     }
 
     func generateAnswers() {
-        var answers = [currentQuerstion * selectedTable]
-        let limit = selectedTable * 12
+        guard selectedTable > 0 else { return }
 
-        while answers.count < 3 {
+        var answers = [correctAnswer]
+        let limit = selectedTable * maxTimesTable
+
+        while answers.count < numberOfAnswerOptions {
             let newValue = Int.random(in: 1...limit)
             if !answers.contains(newValue) {
                 answers.append(newValue)
@@ -61,8 +74,8 @@ class GameViewModel {
         possibleAnswers = answers.shuffled()
     }
 
-    func checkAswer(_ answer: Int) {
-        if currentQuerstion * selectedTable == answer {
+    func checkAnswer(_ answer: Int) {
+        if correctAnswer == answer {
             score += 1
         }
 
@@ -76,9 +89,10 @@ class GameViewModel {
 
     func submitAnswer() {
         guard let answer = Int(userAnswer) else { return }
-        checkAswer(answer)
+        checkAnswer(answer)
     }
 
+    // MARK: - Number Pad Input
     func appendDigit(_ digit: String) {
         userAnswer += digit
     }
@@ -89,19 +103,40 @@ class GameViewModel {
         }
     }
 
+    // MARK: - Game Control
     func gameOver() {
-        showingScore = true
-        isPlaying = false
-        questionCount = 0
-        currentQuerstion = 0
-        selectedTable = 0
+        showingResults = true
+    }
 
+    func cancelGame() {
+        resetGameState()
+        isPlaying = false
+    }
+
+    func restartGame() {
+        resetGameState()
+        askQuestion()
+    }
+
+    func backToMenu() {
+        resetGameState()
+        isPlaying = false
+        selectedTable = 0
+    }
+
+    // MARK: - Private Helpers
+    private func resetGameState() {
+        showingResults = false
+        questionCount = 0
+        currentQuestion = 0
+        score = 0
+        userAnswer = ""
+        possibleAnswers = []
     }
 }
 
 // MARK: - Preview Helpers
 extension GameViewModel {
-    /// Creates a GameViewModel configured for playing state
     static func previewPlaying(
         question: Int = 7,
         table: Int = 8,
@@ -112,14 +147,13 @@ extension GameViewModel {
     ) -> GameViewModel {
         let vm = GameViewModel()
         vm.isPlaying = true
-        vm.currentQuerstion = question
+        vm.currentQuestion = question
         vm.selectedTable = table
         vm.questionCount = questionCount
         vm.selectedNumberOfQuestions = totalQuestions
         vm.score = score
         vm.selectedDifficulty = difficulty
 
-        // Generate realistic answers for easy mode
         if difficulty == .easy {
             let correctAnswer = question * table
             vm.possibleAnswers = [
@@ -132,7 +166,6 @@ extension GameViewModel {
         return vm
     }
 
-    /// Creates a GameViewModel configured for configuration state
     static func previewConfiguration(
         selectedTable: Int = 0,
         selectedQuestions: Int = 5,
